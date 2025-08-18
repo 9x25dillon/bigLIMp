@@ -5,6 +5,23 @@ from typing import List
 import numpy as np
 import os
 
+def _xp():
+	try:
+		import cupy as cp  # type: ignore
+		return cp
+	except Exception:
+		return np
+
+def _svd(A):
+	try:
+		import torch
+		device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+		T = torch.tensor(A, dtype=torch.float32, device=device)
+		u, s, vt = torch.linalg.svd(T, full_matrices=False)
+		return u.cpu().numpy(), s.cpu().numpy(), vt.cpu().numpy()
+	except Exception:
+		return np.linalg.svd(A, full_matrices=False)
+
 app = FastAPI(title="MatrixProcessor")
 app.add_middleware(
 	CORSMiddleware,
@@ -22,14 +39,18 @@ class ChebyshevReq(BaseModel):
 
 @app.post("/chebyshev")
 def chebyshev(req: ChebyshevReq):
-	x = np.linspace(-1, 1, 256)
-	T = [np.ones_like(x), x]
+	xp = _xp()
+	x = xp.linspace(-1, 1, 256)
+	T = [xp.ones_like(x), x]
 	for n in range(2, req.degree + 1):
 		T.append(2 * x * T[-1] - T[-2])
-	basis = np.vstack(T[: req.degree + 1])
-	coeffs = np.array(req.coeffs[: req.degree + 1])
+	basis = xp.vstack(T[: req.degree + 1])
+	coeffs = xp.array(req.coeffs[: req.degree + 1])
 	y = (coeffs[:, None] * basis).sum(axis=0)
-	return {"projected": y.tolist()}
+	try:
+		return {"projected": y.get().tolist()}
+	except Exception:
+		return {"projected": xp.asnumpy(y).tolist() if hasattr(xp, "asnumpy") else y.tolist()}
 
 
 class OptimizeReq(BaseModel):
@@ -39,8 +60,8 @@ class OptimizeReq(BaseModel):
 
 @app.post("/optimize")
 def optimize(req: OptimizeReq):
-	A = np.array(req.matrix)
-	u, s, vt = np.linalg.svd(A, full_matrices=False)
+	A = np.array(req.matrix, dtype=float)
+	u, s, vt = _svd(A)
 	return {
 		"solution": {"u": u[:, 0].tolist(), "sigma": float(s[0]), "v": vt[0, :].tolist()},
 		"metrics": {"condition": float(np.linalg.cond(A))},

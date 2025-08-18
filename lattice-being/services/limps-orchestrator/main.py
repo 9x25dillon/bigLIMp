@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict
 import os
+from math import log
 
 app = FastAPI(title="LIMPS Orchestrator")
 app.add_middleware(
@@ -32,8 +33,10 @@ def score(req: ScoreReq):
 		return {"ghost_score": 0, "coherence": 0, "plan": []}
 	avg_entropy = sum(c.entropy for c in req.chunks) / len(req.chunks)
 	coverage = (req.chunks[-1].span[1] - req.chunks[0].span[0]) / max(1, sum(len(c.text) for c in req.chunks))
+	span_lengths = [max(1, c.span[1]-c.span[0]) for c in req.chunks]
+	len_var = (max(span_lengths) - min(span_lengths)) / max(1, sum(span_lengths)/len(span_lengths))
 	ghost_score = max(0.0, 1.0 - abs(avg_entropy - 3.5) / 3.5)
-	coherence = 0.5 * ghost_score + 0.5 * coverage
+	coherence = max(0.0, 1.0 - 0.5*len_var) * (0.5 * ghost_score + 0.5 * coverage)
 	plan = [
 		{"action": "mesh.generate", "k": 4, "entropy_target": avg_entropy},
 		{"action": "matrix.optimize", "method": "chebyshev"},
