@@ -36,7 +36,7 @@ def observe(req: ObserveReq):
 		period = 0.8 * (now - prev_ts) + 0.2 * row[0]
 		stability = min(1.0, 0.9 * row[1] + 0.1)
 		conn.execute(
-			"UPDATE crystals SET period=?, stability=?, last_observed=? WHERE id=",
+			"UPDATE crystals SET period=?, stability=?, last_observed=? WHERE id=?",
 			(period, stability, str(now), sid),
 		)
 	else:

@@ -43,5 +43,30 @@ services:
       - NATS_URL=nats://nats:4222
     ports: ["8080:8080"]
 
+  mesh:
+    build: ../services/mesh-orchestrator
+    environment:
+      - LATTICE_BASE=http://host.docker.internal
+      - EMOTION_URL=http://emotion:8000/affect
+      - LIMPS_URL=http://limps:8000/score
+      - QUANT_URL=http://quantum:8081/collapse
+    ports: ["8006:8000"]
+    depends_on: [limps, emotion, quantum]
+
+  quantum:
+    build: ../services/quantum-sim
+    ports: ["8081:8081"]
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: lattice
+      POSTGRES_PASSWORD: lattice
+      POSTGRES_DB: lattice
+    ports: ["5432:5432"]
+    volumes:
+      - pg:/var/lib/postgresql/data
+
 volumes:
   timecrystals:
+  pg:

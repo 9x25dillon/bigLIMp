@@ -1,5 +1,6 @@
 import express from "express";
 import { connect, StringCodec } from "nats";
+import { verify } from "./verify";
 
 const app = express();
 app.use(express.json());
@@ -13,7 +14,12 @@ let nc: any;
 })();
 
 app.post("/exchange", async (req, res) => {
-	await nc.publish("lb.exo.bridge", sc.encode(JSON.stringify(req.body)));
+	const { envelope, signature, publicKey } = req.body || {};
+	const payload = JSON.stringify(envelope || {});
+	if (!publicKey || !signature || !verify(publicKey, payload, signature)) {
+		return res.status(400).json({ ok: false, error: "bad signature" });
+	}
+	await nc.publish("lb.exo.bridge", sc.encode(payload));
 	res.json({ ok: true });
 });
 
