@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lattice.local/schemas/mesh-candidate.schema.json",
+  "title": "MeshCandidate",
+  "type": "object",
+  "required": ["id", "prompt", "params"],
+  "properties": {
+    "id": {"type": "string"},
+    "prompt": {"type": "string"},
+    "params": {
+      "type": "object",
+      "properties": {
+        "temperature": {"type": "number"},
+        "top_p": {"type": "number"},
+        "emotion_bias": {"type": "array", "items": {"type": "number"}},
+        "entropy_target": {"type": "number"}
+      }
+    }
+  }
+}

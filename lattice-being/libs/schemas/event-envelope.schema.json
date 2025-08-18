@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lattice.local/schemas/event-envelope.schema.json",
+  "title": "EventEnvelope",
+  "type": "object",
+  "required": ["id", "ts", "type", "payload", "trace_id"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "ts": {"type": "string", "format": "date-time"},
+    "type": {"type": "string"},
+    "trace_id": {"type": "string"},
+    "source": {"type": "string"},
+    "payload": {"type": "object"},
+    "entropies": {
+      "type": "object",
+      "properties": {
+        "information": {"type": "number"},
+        "emotional": {"type": "number"},
+        "computational": {"type": "number"}
+      },
+      "additionalProperties": false
+    },
+    "state_hash": {"type": "string"}
+  },
+  "additionalProperties": false
+}

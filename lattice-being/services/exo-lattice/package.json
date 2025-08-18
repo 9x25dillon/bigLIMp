@@ -1,0 +1,19 @@
+{
+  "name": "exo-lattice",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json && cp package.json dist/package.json && npm --prefix dist install --omit=dev"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "nats": "^2.25.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2",
+    "typescript": "^5.4.0"
+  }
+}
