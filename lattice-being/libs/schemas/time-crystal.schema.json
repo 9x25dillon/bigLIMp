@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lattice.local/schemas/time-crystal.schema.json",
+  "title": "TimeCrystal",
+  "type": "object",
+  "required": ["id", "signature", "period", "stability"],
+  "properties": {
+    "id": {"type": "string"},
+    "signature": {"type": "string"},
+    "period": {"type": "number"},
+    "stability": {"type": "number"},
+    "last_observed": {"type": "string", "format": "date-time"}
+  }
+}

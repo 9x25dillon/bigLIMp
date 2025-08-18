@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lattice.local/schemas/chunk.schema.json",
+  "title": "Chunk",
+  "type": "object",
+  "required": ["id", "text", "span", "entropy"],
+  "properties": {
+    "id": {"type": "string"},
+    "text": {"type": "string"},
+    "span": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2},
+    "entropy": {"type": "number"},
+    "meta": {"type": "object"}
+  }
+}

@@ -1,0 +1,72 @@
+version: "3.9"
+services:
+  nats:
+    image: nats:2
+    command: ["-js"]
+    ports: ["4222:4222", "8222:8222"]
+
+  choppy:
+    build: ../services/choppy-gateway
+    environment:
+      - PORT=8001
+    ports: ["8001:8000"]
+
+  limps:
+    build: ../services/limps-orchestrator
+    environment:
+      - PORT=8002
+    ports: ["8002:8000"]
+
+  matrix:
+    build: ../services/matrixprocessor
+    environment:
+      - PORT=8003
+    ports: ["8003:8000"]
+
+  timecrystals:
+    build: ../services/time-crystals
+    volumes:
+      - timecrystals:/data
+    environment:
+      - PORT=8004
+    ports: ["8004:8000"]
+
+  emotion:
+    build: ../services/emotion-layer
+    environment:
+      - PORT=8005
+    ports: ["8005:8000"]
+
+  exo:
+    build: ../services/exo-lattice
+    environment:
+      - NATS_URL=nats://nats:4222
+    ports: ["8080:8080"]
+
+  mesh:
+    build: ../services/mesh-orchestrator
+    environment:
+      - LATTICE_BASE=http://host.docker.internal
+      - EMOTION_URL=http://emotion:8000/affect
+      - LIMPS_URL=http://limps:8000/score
+      - QUANT_URL=http://quantum:8081/collapse
+    ports: ["8006:8000"]
+    depends_on: [limps, emotion, quantum]
+
+  quantum:
+    build: ../services/quantum-sim
+    ports: ["8081:8081"]
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: lattice
+      POSTGRES_PASSWORD: lattice
+      POSTGRES_DB: lattice
+    ports: ["5432:5432"]
+    volumes:
+      - pg:/var/lib/postgresql/data
+
+volumes:
+  timecrystals:
+  pg:
