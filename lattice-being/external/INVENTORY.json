@@ -1,0 +1,108 @@
+{
+  "owner": "9x25dillon",
+  "selected": [
+    "9xdSq-LIMPS-FemTO-R1C",
+    "al-ULS",
+    "bigLIMp",
+    "enjoypy",
+    "Eopiez",
+    "LiMp",
+    "orwells-egg",
+    "shout",
+    "TEmp-oral_vectraxice"
+  ],
+  "reports": [
+    {
+      "repo": "9xdSq-LIMPS-FemTO-R1C",
+      "copied": [
+        {
+          "type": "file",
+          "from": "README.md",
+          "to": "external/9xdSq-LIMPS-FemTO-R1C/README.md"
+        }
+      ]
+    },
+    {
+      "repo": "al-ULS",
+      "copied": [
+        {
+          "type": "file",
+          "from": "README.md",
+          "to": "external/al-ULS/README.md"
+        }
+      ]
+    },
+    {
+      "repo": "bigLIMp",
+      "copied": []
+    },
+    {
+      "repo": "enjoypy",
+      "copied": [
+        {
+          "type": "file",
+          "from": ".gitignore",
+          "to": "external/enjoypy/.gitignore"
+        },
+        {
+          "type": "file",
+          "from": "README.md",
+          "to": "external/enjoypy/README.md"
+        }
+      ]
+    },
+    {
+      "repo": "Eopiez",
+      "copied": [
+        {
+          "type": "file",
+          "from": ".gitignore",
+          "to": "external/Eopiez/.gitignore"
+        },
+        {
+          "type": "file",
+          "from": "README.md",
+          "to": "external/Eopiez/README.md"
+        }
+      ]
+    },
+    {
+      "repo": "LiMp",
+      "error": "unsupported operand type(s) for |: 'map' and 'map'"
+    },
+    {
+      "repo": "orwells-egg",
+      "copied": [
+        {
+          "type": "file",
+          "from": "README.md",
+          "to": "external/orwells-egg/README.md"
+        }
+      ]
+    },
+    {
+      "repo": "shout",
+      "copied": [
+        {
+          "type": "dir",
+          "from": "scripts",
+          "to": "external/shout/scripts"
+        },
+        {
+          "type": "file",
+          "from": "Makefile",
+          "to": "external/shout/Makefile"
+        },
+        {
+          "type": "file",
+          "from": "README.md",
+          "to": "external/shout/README.md"
+        }
+      ]
+    },
+    {
+      "repo": "TEmp-oral_vectraxice",
+      "error": "unsupported operand type(s) for |: 'map' and 'map'"
+    }
+  ]
+}
