@@ -41,6 +41,8 @@ services:
     build: ../services/exo-lattice
     environment:
       - NATS_URL=nats://nats:4222
+      - ALLOW_LIST=
+
     ports: ["8080:8080"]
 
   mesh:
@@ -50,6 +52,12 @@ services:
       - EMOTION_URL=http://emotion:8000/affect
       - LIMPS_URL=http://limps:8000/score
       - QUANT_URL=http://quantum:8081/collapse
+
+      - MODEL_PROVIDER=vllm
+      - MODEL_BASE_URL=http://host.docker.internal:8007/v1
+      - MODEL_NAME=gpt-3.5-turbo
+      - MODEL_API_KEY= 
+
     ports: ["8006:8000"]
     depends_on: [limps, emotion, quantum]
 

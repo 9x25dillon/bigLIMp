@@ -16,6 +16,8 @@ let nc: any;
 app.post("/exchange", async (req, res) => {
 	const { envelope, signature, publicKey } = req.body || {};
 	const payload = JSON.stringify(envelope || {});
+
+
 	if (!publicKey || !signature || !verify(publicKey, payload, signature)) {
 		return res.status(400).json({ ok: false, error: "bad signature" });
 	}
@@ -23,4 +25,8 @@ app.post("/exchange", async (req, res) => {
 	res.json({ ok: true });
 });
 
+
 app.listen(8080, () => console.log("Exo-Lattice listening on 8080"));
+
+app.listen(8080, () => console.log("Exo-Lattice listening on 8080"));
+
