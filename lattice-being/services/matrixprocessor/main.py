@@ -22,6 +22,7 @@ def _svd(A):
 	except Exception:
 		return np.linalg.svd(A, full_matrices=False)
 
+
 app = FastAPI(title="MatrixProcessor")
 app.add_middleware(
 	CORSMiddleware,
@@ -39,6 +40,7 @@ class ChebyshevReq(BaseModel):
 
 @app.post("/chebyshev")
 def chebyshev(req: ChebyshevReq):
+
 	xp = _xp()
 	x = xp.linspace(-1, 1, 256)
 	T = [xp.ones_like(x), x]
@@ -52,6 +54,16 @@ def chebyshev(req: ChebyshevReq):
 	except Exception:
 		return {"projected": xp.asnumpy(y).tolist() if hasattr(xp, "asnumpy") else y.tolist()}
 
+	x = np.linspace(-1, 1, 256)
+	T = [np.ones_like(x), x]
+	for n in range(2, req.degree + 1):
+		T.append(2 * x * T[-1] - T[-2])
+	basis = np.vstack(T[: req.degree + 1])
+	coeffs = np.array(req.coeffs[: req.degree + 1])
+	y = (coeffs[:, None] * basis).sum(axis=0)
+	return {"projected": y.tolist()}
+
+
 
 class OptimizeReq(BaseModel):
 	matrix: List[List[float]]
@@ -60,8 +72,13 @@ class OptimizeReq(BaseModel):
 
 @app.post("/optimize")
 def optimize(req: OptimizeReq):
+
 	A = np.array(req.matrix, dtype=float)
 	u, s, vt = _svd(A)
+
+	A = np.array(req.matrix)
+	u, s, vt = np.linalg.svd(A, full_matrices=False)
+
 	return {
 		"solution": {"u": u[:, 0].tolist(), "sigma": float(s[0]), "v": vt[0, :].tolist()},
 		"metrics": {"condition": float(np.linalg.cond(A))},
@@ -71,4 +88,7 @@ def optimize(req: OptimizeReq):
 if __name__ == "__main__":
 	import uvicorn
 	port = int(os.getenv("PORT", "8000"))
+
+	uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+
 	uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

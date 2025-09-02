@@ -20,6 +20,7 @@ class IngestReq(BaseModel):
 	text: str
 	size: int = 600
 	overlap: int = 90
+
 	adaptive: bool | None = True
 
 
@@ -37,6 +38,7 @@ def shannon_entropy(s: str) -> float:
 	c = Counter(s)
 	total = len(s)
 	return -sum((n/total) * math.log2(n/total) for n in c.values())
+
 
 
 def _init_tracing():
@@ -62,6 +64,7 @@ def ingest(req: IngestReq):
 	k, r = req.size, req.overlap
 	chunks: List[Chunk] = []
 	i = 0
+
 	if req.adaptive and len(t) > 0:
 		target = 3.5
 		while i < len(t):
@@ -88,6 +91,13 @@ def ingest(req: IngestReq):
 			if j == len(t):
 				break
 			i = j - r if j - r > i else j
+	while i < len(t):
+		j = min(len(t), i + k)
+		segment = t[i:j]
+		chunks.append(Chunk(id=str(uuid.uuid4()), text=segment, span=(i, j), entropy=shannon_entropy(segment)))
+		if j == len(t):
+			break
+		i = j - r if j - r > i else j
 	return chunks
 
 
@@ -104,3 +114,5 @@ if __name__ == "__main__":
 	import uvicorn
 	port = int(os.getenv("PORT", "8000"))
 	uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+  uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+

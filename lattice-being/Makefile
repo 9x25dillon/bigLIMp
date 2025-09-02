@@ -26,3 +26,8 @@ mesh:
 
 otel:
 	@echo "Set OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 before running services"
+
+import-multi-branch:
+	python3 scripts/import_multi_branch_repos.py --user $(USER)
+
+

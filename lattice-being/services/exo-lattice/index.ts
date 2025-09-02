@@ -8,8 +8,6 @@ app.use(express.json());
 const sc = StringCodec();
 let nc: any;
 
-const ALLOW_LIST = (process.env.ALLOW_LIST || "").split(",").map(s => s.trim()).filter(Boolean);
-
 (async () => {
 	nc = await connect({ servers: process.env.NATS_URL || "nats://nats:4222" });
 	console.log("Exo-Lattice connected to NATS");
@@ -18,9 +16,8 @@ const ALLOW_LIST = (process.env.ALLOW_LIST || "").split(",").map(s => s.trim()).
 app.post("/exchange", async (req, res) => {
 	const { envelope, signature, publicKey } = req.body || {};
 	const payload = JSON.stringify(envelope || {});
-	if (ALLOW_LIST.length && !ALLOW_LIST.includes(publicKey)) {
-		return res.status(403).json({ ok: false, error: "forbidden" });
-	}
+
+
 	if (!publicKey || !signature || !verify(publicKey, payload, signature)) {
 		return res.status(400).json({ ok: false, error: "bad signature" });
 	}
@@ -28,4 +25,8 @@ app.post("/exchange", async (req, res) => {
 	res.json({ ok: true });
 });
 
+
 app.listen(8080, () => console.log("Exo-Lattice listening on 8080"));
+
+app.listen(8080, () => console.log("Exo-Lattice listening on 8080"));
+

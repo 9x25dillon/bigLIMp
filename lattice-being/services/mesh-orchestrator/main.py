@@ -2,18 +2,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
+
 import httpx, os, uuid, asyncio
+
+import httpx, os, uuid
+
 
 BASE = os.getenv("LATTICE_BASE", "http://localhost")
 EMOTION_URL = os.getenv("EMOTION_URL", f"{BASE}:8005/affect")
 LIMPS_URL = os.getenv("LIMPS_URL", f"{BASE}:8002/score")
 QUANT_URL = os.getenv("QUANT_URL", f"{BASE}:8081/collapse")
 
+
 # Model server config (OpenAI-compatible or OpenRouter/vLLM)
 MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "vllm")  # openai|openrouter|vllm
 MODEL_BASE_URL = os.getenv("MODEL_BASE_URL", f"{BASE}:8007/v1")
 MODEL_API_KEY = os.getenv("MODEL_API_KEY", "")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
+
 
 app = FastAPI(title="Mesh Orchestrator")
 app.add_middleware(
@@ -28,6 +34,7 @@ app.add_middleware(
 class RespondReq(BaseModel):
 	prompt: str
 	k: int = 4
+
 
 
 def _init_tracing():
@@ -88,7 +95,21 @@ async def respond(req: RespondReq):
 		emo = (await cl.post(EMOTION_URL, json={"text": req.prompt})).json()
 	bias = emo.get("vector", [0.125] * 8)
 
+
 	candidates = await generate_candidates(req.prompt, req.k, bias)
+
+	def mk(i: int):
+		variants = [str.upper, str.lower, str.title, lambda s: s + " — (mesh)"]
+		f = variants[i % len(variants)]
+		txt = f(req.prompt)
+		return {
+			"id": str(uuid.uuid4()),
+			"prompt": txt,
+			"params": {"temperature": 0.3 + 0.1 * i, "emotion_bias": bias, "entropy_target": 3.5},
+		}
+
+	candidates = [mk(i) for i in range(req.k)]
+
 
 	scores = []
 	async with httpx.AsyncClient() as cl:

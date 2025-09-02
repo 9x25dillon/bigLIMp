@@ -10,8 +10,12 @@
   },
   "dependencies": {
     "express": "^4.19.2",
+
     "nats": "^2.25.0",
     "tweetnacl": "^1.0.3"
+
+    "nats": "^2.25.0"
+
   },
   "devDependencies": {
     "tsx": "^4.16.2",

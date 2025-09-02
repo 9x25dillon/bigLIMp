@@ -13,6 +13,7 @@ app.add_middleware(
 	allow_headers=["*"],
 )
 
+
 POSTGRES_URL = os.getenv("POSTGRES_URL", "")
 use_pg = bool(POSTGRES_URL)
 
@@ -39,6 +40,14 @@ else:
 		"CREATE TABLE IF NOT EXISTS crystals(id TEXT PRIMARY KEY, signature TEXT, period REAL, stability REAL, last_observed TEXT)"
 	)
 
+db_path = "/data/crystals.db"
+os.makedirs("/data", exist_ok=True)
+conn = sqlite3.connect(db_path, check_same_thread=False)
+conn.execute(
+	"CREATE TABLE IF NOT EXISTS crystals(id TEXT PRIMARY KEY, signature TEXT, period REAL, stability REAL, last_observed TEXT)"
+)
+
+
 
 class ObserveReq(BaseModel):
 	signature: str
@@ -48,6 +57,7 @@ class ObserveReq(BaseModel):
 def observe(req: ObserveReq):
 	now = time.time()
 	sid = hashlib.sha256(req.signature.encode()).hexdigest()[:16]
+
 	if use_pg:
 		with engine.begin() as cx:
 			row = cx.execute(text("SELECT period, stability, last_observed FROM crystals WHERE id=:id"), {"id": sid}).fetchone()
@@ -80,9 +90,30 @@ def observe(req: ObserveReq):
 		conn.commit()
 		return {"id": sid, "period": period, "stability": stability}
 
+	cur = conn.execute("SELECT period, stability, last_observed FROM crystals WHERE id=?", (sid,))
+	row = cur.fetchone()
+	if row:
+		prev_ts = float(row[2]) if row[2] else now
+		period = 0.8 * (now - prev_ts) + 0.2 * row[0]
+		stability = min(1.0, 0.9 * row[1] + 0.1)
+		conn.execute(
+			"UPDATE crystals SET period=?, stability=?, last_observed=? WHERE id=?",
+			(period, stability, str(now), sid),
+		)
+	else:
+		period, stability = 0.0, 0.1
+		conn.execute(
+			"INSERT INTO crystals(id, signature, period, stability, last_observed) VALUES(?,?,?,?,?)",
+			(sid, req.signature, period, stability, str(now)),
+		)
+	conn.commit()
+	return {"id": sid, "period": period, "stability": stability}
+
+
 
 @app.get("/crystals")
 def list_crystals():
+
 	if use_pg:
 		with engine.begin() as cx:
 			rows = cx.execute(text("SELECT id, signature, period, stability, last_observed FROM crystals ORDER BY stability DESC LIMIT 100")).fetchall()
@@ -99,6 +130,16 @@ def list_crystals():
 			for r in cur.fetchall()
 		]
 		return rows
+
+	cur = conn.execute(
+		"SELECT id, signature, period, stability, last_observed FROM crystals ORDER BY stability DESC LIMIT 100"
+	)
+	rows = [
+		dict(id=r[0], signature=r[1], period=r[2], stability=r[3], last_observed=r[4])
+		for r in cur.fetchall()
+	]
+	return rows
+
 
 
 if __name__ == "__main__":

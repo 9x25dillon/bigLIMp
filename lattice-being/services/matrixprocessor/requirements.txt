@@ -2,5 +2,8 @@ fastapi==0.111.0
 uvicorn[standard]==0.30.0
 pydantic==2.8.2
 numpy==1.26.4
+
 torch==2.3.1
 cupy-cuda12x; platform_system == "Linux"
+
+
