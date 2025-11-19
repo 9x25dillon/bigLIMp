@@ -1,0 +1,10 @@
+include("../src/MessageVectorizer.jl")
+using .MessageVectorizer
+
+iso = MotifToken(:isolation_time, Dict(:intensity=>0.8, :duration=>24.0), 0.7, [:temporal, :spatial])
+dec = MotifToken(:decay_memory, Dict(:decay_rate=>0.3, :memory_strength=>0.6), 0.6, [:memory, :temporal])
+vec = initialize_vectorizer(64)
+add_motif_embedding!(vec, iso)
+add_motif_embedding!(vec, dec)
+ms = vectorize_message([iso,dec], vec)
+println(al_uls_interface(ms))

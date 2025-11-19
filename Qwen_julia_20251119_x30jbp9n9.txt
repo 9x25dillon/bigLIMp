@@ -1,0 +1,24 @@
+using Symbolics
+
+struct MotifToken
+    name::Symbol
+    properties::Dict{Symbol, Any}
+    weight::Float64
+    context::Vector{Symbol}
+end
+
+struct MessageState
+    symbolic_expression::Num
+    vector_representation::Vector{Float64}
+    entropy_score::Float64
+    motif_configuration::Dict{Symbol, Float64}
+    metadata::Dict{String, Any}
+end
+
+mutable struct MessageVectorizer
+    motif_embeddings::Dict{Symbol, Vector{Float64}}
+    symbolic_variables::Dict{Symbol, Num}
+    embedding_dim::Int
+    entropy_threshold::Float64
+    compression_ratio::Float64
+end

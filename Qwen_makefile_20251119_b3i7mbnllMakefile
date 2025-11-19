@@ -1,0 +1,21 @@
+.PHONY: install dev test build clean up
+
+install:
+	cd backend && pip install -r requirements.txt
+	cd frontend && npm install
+
+dev:
+	docker compose up --build
+
+test:
+	cd backend && pytest -q
+	cd vectorizer && julia test/runtests.jl
+
+build:
+	cd frontend && npm run build
+
+clean:
+	rm -rf backend/__pycache__ backend/sql_app.db frontend/node_modules frontend/dist
+
+up:
+	docker compose up --build

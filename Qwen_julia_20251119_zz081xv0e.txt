@@ -1,0 +1,13 @@
+using Test
+include("../src/MessageVectorizer.jl")
+using .MessageVectorizer
+
+@testset "MessageVectorizer" begin
+    v = initialize_vectorizer(8)
+    m1 = MotifToken(:a, Dict(:val=>0.5), 0.7, [:temporal])
+    m2 = MotifToken(:b, Dict(:val=>0.2), 0.4, [:memory])
+    add_motif_embedding!(v, m1)
+    add_motif_embedding!(v, m2)
+    ms = vectorize_message([m1,m2], v)
+    @test length(ms.vector_representation) == 8
+end

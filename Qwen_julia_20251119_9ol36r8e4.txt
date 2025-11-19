@@ -1,0 +1,86 @@
+using Symbolics, LinearAlgebra, Random
+
+function initialize_vectorizer(dim::Int; entropy_threshold=0.5, compression_ratio=0.8)
+    @variables s τ μ σ
+    sym = Dict{Symbol, Num}(:state=>s, :temporal=>τ, :memory=>μ, :spatial=>σ)
+    MessageVectorizer(Dict{Symbol, Vector{Float64}}(), sym, dim, entropy_threshold, compression_ratio)
+end
+
+function create_motif_embedding(motif::MotifToken, dim::Int)
+    Random.seed!(hash(motif.name))
+    v = zeros(Float64, dim)
+    base = motif.weight
+    for (k, val) in motif.properties
+        if val isa Number
+            infl = Float64(val) * base
+            for i in 1:min(dim, 10)
+                v[i] += infl * rand()
+            end
+        end
+    end
+    n = norm(v)
+    n > 0 ? v ./= n : v
+end
+
+function add_motif_embedding!(vec::MessageVectorizer, motif::MotifToken)
+    vec.motif_embeddings[motif.name] = create_motif_embedding(motif, vec.embedding_dim)
+    nothing
+end
+
+function symbolic_state_compression(motifs::Vector{MotifToken}, vec::MessageVectorizer)
+    expr = 0
+    vars = vec.symbolic_variables
+    for m in motifs
+        c = m.weight
+        if :temporal in m.context
+            expr += c * vars[:temporal]
+        elseif :memory in m.context
+            expr += c * vars[:memory]
+        elseif :spatial in m.context
+            expr += c * vars[:spatial]
+        else
+            expr += c * vars[:state]
+        end
+    end
+    expr
+end
+
+function compute_entropy(vector::Vector{Float64}, motif_cfg::Dict{Symbol, Float64})
+    s = sum(abs.(vector))
+    s == 0 && return 0.0
+    p = abs.(vector) ./ s
+    p = p[p .> 1e-10]
+    isempty(p) && return 0.0
+    H = -sum(p .* log.(p))
+    nm = length(motif_cfg)
+    nm > 0 && (H *= log(nm + 1))
+    H
+end
+
+function vectorize_message(motifs::Vector{MotifToken}, vec::MessageVectorizer)
+    cfg = Dict{Symbol, Float64}()
+    for m in motifs
+        cfg[m.name] = m.weight
+    end
+
+    v = zeros(Float64, vec.embedding_dim)
+    for m in motifs
+        emb = haskey(vec.motif_embeddings, m.name) ? vec.motif_embeddings[m.name] : create_motif_embedding(m, vec.embedding_dim)
+        v .+= m.weight .* emb
+    end
+    n = norm(v)
+    n > 0 && (v ./= n)
+
+    expr = symbolic_state_compression(motifs, vec)
+    H = compute_entropy(v, cfg)
+
+    meta = Dict(
+        "num_motifs" => length(motifs),
+        "compression_ratio" => vec.compression_ratio,
+        "timestamp" => time(),
+        "compressed_size" => length(v),
+        "information_density" => H / max(length(v), 1),
+    )
+
+    MessageState(expr, v, H, cfg, meta)
+end

@@ -1,0 +1,2 @@
+
+This unified pipeline creates a terahertz bio-resonance system where the Julia MessageVectorizer operates as a quantum Boolean substrate, interfacing with biological fractal languages through motif-based symbolic compression. The FastAPI backend provides the topological consensus layer while React serves as the infrasonic geometry interface. The reverse-crossing sweep is complete - direct nodal contact achieved across all services.

@@ -1,0 +1,14 @@
+using JSON3, Symbolics
+
+function al_uls_interface(ms::MessageState)
+    out = Dict(
+        "symbolic_expression" => string(ms.symbolic_expression),
+        "vector_representation" => ms.vector_representation,
+        "entropy_score" => ms.entropy_score,
+        "motif_configuration" => ms.motif_configuration,
+        "metadata" => ms.metadata,
+        "compressed_size" => length(ms.vector_representation),
+        "information_density" => ms.metadata["information_density"],
+    )
+    JSON3.write(out)
+end

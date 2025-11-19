@@ -1,0 +1,13 @@
+module MessageVectorizer
+
+using Symbolics, LinearAlgebra, StatsBase, JSON3, Random
+
+export MotifToken, MessageState, MessageVectorizer
+export initialize_vectorizer, create_motif_embedding, add_motif_embedding!
+export symbolic_state_compression, compute_entropy, vectorize_message, al_uls_interface
+
+include("types.jl")
+include("core.jl")
+include("utils.jl")
+
+end

@@ -1,0 +1,32 @@
+import Pkg
+Pkg.activate(@__DIR__)
+Pkg.instantiate()
+
+using HTTP, JSON3
+include("src/MessageVectorizer.jl")
+using .MessageVectorizer
+
+const VEC = initialize_vectorizer(64)
+
+function handle(req)
+    if req.method == "POST" && HTTP.URIs.path(req.target) == "/vectorize"
+        body = String(req.body)
+        data = JSON3.read(body)
+        dim = get(data, :embedding_dim, 64)
+        vec = initialize_vectorizer(dim)
+        motifs = MotifToken[]
+        for m in data[:motifs]
+            push!(motifs, MotifToken(Symbol(m[:name]), Dict{Symbol,Any}((Symbol(k)=>v) for (k,v) in pairs(m[:properties])), Float64(m[:weight]), Symbol.(Vector{String}(m[:context]))))
+        end
+        # prime embeddings
+        for m in motifs
+            add_motif_embedding!(vec, m)
+        end
+        ms = vectorize_message(motifs, vec)
+        json = al_uls_interface(ms)
+        return HTTP.Response(200, json, ["Content-Type"=>"application/json"])
+    end
+    return HTTP.Response(404, "Not Found")
+end
+
+HTTP.serve(handle, ip"0.0.0.0", 8080)

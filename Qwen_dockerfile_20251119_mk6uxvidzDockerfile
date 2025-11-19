@@ -1,0 +1,6 @@
+FROM julia:1.9
+WORKDIR /app
+COPY . .
+RUN julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate()'
+EXPOSE 8080
+CMD ["julia", "server.jl"]
