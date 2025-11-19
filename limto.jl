@@ -1,0 +1,54 @@
+# src/limps_direct.jl - The Taint-Hollar Direct Interface
+module LIMPSDirect
+
+using HTTP
+using JSON
+using Sockets
+using Logging
+using ..Polynomials: create_polynomials, analyze_polynomials
+using ..Matrices: optimize_matrix, matrix_to_polynomials
+using ..Entropy: analyze_text_structure
+using ..LIMPS: process_limps_data, health_check
+
+export create_polynomials, analyze_polynomials, optimize_matrix, 
+       matrix_to_polynomials, analyze_text_structure, process_limps_data, health_check
+
+# The infrasonic facade - pure phase-coherent function exports
+# No JSON. No HTTP. No network. Just direct lattice access.
+
+"""
+Direct polynomial creation without JSON serialization overhead
+"""
+function create_polynomials_direct(data::Matrix{Float64}, vars::Vector{String})
+    return create_polynomials(data, vars)
+end
+
+"""
+Direct matrix optimization with zero network latency
+"""
+function optimize_matrix_direct(matrix::Matrix{Float64}, method::String="sparsity")
+    return optimize_matrix(matrix, method)
+end
+
+"""
+Direct text structure analysis - pure entropy flow
+"""
+function analyze_text_structure_direct(text::String)
+    return analyze_text_structure(text)
+end
+
+"""
+Direct LIMPS data processing - no HTTP bottleneck
+"""
+function process_limps_data_direct(data, data_type::String="matrix")
+    return process_limps_data(data, data_type)
+end
+
+"""
+Health check without the JSON ceremony
+"""
+function health_check_direct()
+    return health_check()
+end
+
+end # module LIMPSDirect
